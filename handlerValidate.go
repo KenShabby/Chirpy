@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 )
 
 func (cfg *apiConfig) handlerValidate(w http.ResponseWriter, r *http.Request) {
@@ -11,7 +12,7 @@ func (cfg *apiConfig) handlerValidate(w http.ResponseWriter, r *http.Request) {
 		Body string `json:"body"`
 	}
 	type returnVals struct {
-		Valid bool `json:"valid"`
+		CleanBody string `json:"clean_body"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -26,7 +27,30 @@ func (cfg *apiConfig) handlerValidate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Assuming the body passes length validation, check for profanity.
+	body.Body = replaceBadWords(body.Body)
+
 	respondWithJSON(w, http.StatusOK, returnVals{
-		Valid: true,
+		CleanBody: body.Body,
 	})
+}
+
+func replaceBadWords(suspect string) string {
+	badWords := map[string]struct{}{
+		"kerfuffle": {},
+		"sharbert":  {},
+		"fornax":    {},
+	}
+	var goodString string
+
+	// Case insensitive check
+	words := strings.Split(suspect, " ")
+	for i, word := range words {
+		lowerWord := strings.ToLower(word)
+		if _, ok := badWords[lowerWord]; ok {
+			words[i] = "****"
+		}
+	}
+	goodString = strings.Join(words, " ")
+	return goodString
 }
