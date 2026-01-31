@@ -12,7 +12,7 @@ func (cfg *apiConfig) handlerValidate(w http.ResponseWriter, r *http.Request) {
 		Body string `json:"body"`
 	}
 	type returnVals struct {
-		CleanBody string `json:"clean_body"`
+		CleanedBody string `json:"cleaned_body"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -31,7 +31,7 @@ func (cfg *apiConfig) handlerValidate(w http.ResponseWriter, r *http.Request) {
 	body.Body = replaceBadWords(body.Body)
 
 	respondWithJSON(w, http.StatusOK, returnVals{
-		CleanBody: body.Body,
+		CleanedBody: body.Body,
 	})
 }
 
